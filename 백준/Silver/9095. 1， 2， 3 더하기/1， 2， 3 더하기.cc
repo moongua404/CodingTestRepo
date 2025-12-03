@@ -3,27 +3,10 @@
 using namespace std;
 
 void testCase() {
+    static int answer[10] = {1, 2, 4, 7, 13, 24, 44, 81, 149, 274};
     int n;
     cin >> n;
-    int* arr = new int[n+1];
-    for (int i = 0; i < n; i++) {
-        arr[i] = 0;
-    }
-
-    arr[0] = 1;
-    for (int i = 0; i < n; i++) {
-        if (i+1 < n+1) {
-            arr[i+1] += arr[i];
-        }
-        if (i+2 < n+1) {
-            arr[i+2] += arr[i];
-        }
-        if (i+3 < n+1) {
-            arr[i+3] += arr[i];
-        }
-    }
-
-    cout << arr[n] << '\n';
+    cout << answer[n-1] << '\n';
 }
 
 void solution() {
