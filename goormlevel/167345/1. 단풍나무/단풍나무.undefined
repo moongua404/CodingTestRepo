@@ -1,0 +1,69 @@
+			if (data[newX][newY] == 0) {
+				cnt++;
+			}
+		}
+		return cnt;
+	}
+
+	/* update changes & fill again Q */
+	void updateQueue(queue<Node> changes) {
+		while(!changes.empty()) {
+			Node change = changes.front();
+			changes.pop();
+			
+			int newV = data[change.x][change.y] - change.v;
+			if (newV < 0) {
+				newV = 0;
+			}
+			
+			data[change.x][change.y] = newV;
+			if (newV != 0) {
+				left.push(Node(change.x, change.y, newV));
+			}
+		}
+	}
+public:
+	Board(int size) {
+		maxBoardSize = size;
+		data = new int*[size];
+		for (int x = 0; x < size; x++) {
+			data[x] = new int[size];
+			for (int y = 0; y < size; y++) {
+				int v;
+				cin >> v;
+				data[x][y] = v;
+				if (v != 0) {
+					left.push(Node(x, y, v));
+				}
+			}
+		}
+	}
+
+	void lastDay() {
+		queue<Node> temp;
+		while(!left.empty()) {
+			Node l = left.front();
+			left.pop();
+			temp.push(Node(l.x, l.y, countNear0(l.x, l.y)));
+		}
+		updateQueue(temp);
+	}
+
+	bool isAlive() {
+		return !left.empty();
+	}
+};
+
+int main() {
+	int N, day = 0;
+	cin >> N;
+	Board board(N);
+	while(board.isAlive()) {
+		day++;
+		board.lastDay();
+	}
+	cout << day << "\n";
+	return 0;
+}
+
+/*
