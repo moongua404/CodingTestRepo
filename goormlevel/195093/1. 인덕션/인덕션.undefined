@@ -1,0 +1,84 @@
+#include <iostream>
+#include <map>
+#include <algorithm>
+using namespace std;
+
+int minCost(int a, int b) {
+	int c1 = a-b;
+	int c2 = b-a;
+	if (c1 < 0) c1 = 10 + c1;
+	if (c2 < 0) c2 = 10 + c2;
+	return (c1 < c2) ? c1 : c2;
+}
+
+struct InductionSet {
+public:
+	int slot[3];
+	InductionSet(int a, int b, int c) {
+		slot[0] = a;
+		slot[1] = b;
+		slot[2] = c;
+		sort(slot, slot+3);
+	}
+	bool operator<(const InductionSet& other) const {
+		if (slot[0] == other.slot[0] && slot[1] == other.slot[1]) return slot[2] < other.slot[2];
+		if (slot[0] == other.slot[0]) return slot[1] < other.slot[1];
+		return slot[0] < other.slot[0];
+	}
+};
+
+int main() {
+	int N;
+	cin >> N;
+
+	map<int, int*> others;
+	others.insert({0, new int[2]{1, 2}});
+	others.insert({1, new int[2]{0, 2}});
+	others.insert({2, new int[2]{0, 1}});
+
+	map<InductionSet, int> sets;
+	sets.insert({InductionSet(0, 0, 0), 0});
+	
+	for (int i = 0; i < N; i++) {
+		int degree;
+		cin >> degree;
+		map<InductionSet, int> newSets;
+
+		for (pair<InductionSet, int> set : sets) {
+			for (int index : {0, 1, 2}) {
+				int addCost = minCost(set.first.slot[index], degree);
+				InductionSet newSet(InductionSet(set.first.slot[others[index][0]], set.first.slot[others[index][1]], degree));
+				if (newSets.find(newSet) == newSets.end()) {
+					newSets.insert({newSet, set.second + addCost});
+					continue;
+				}
+				if (newSets[newSet] > set.second + addCost) {
+					newSets[newSet] = set.second + addCost;
+				}
+			}
+		}
+		sets = newSets;
+	}
+
+	int min = 5000 * 9 + 1;
+	for (pair<InductionSet, int> set : sets) {
+		if (min > set.second) {
+			min = set.second;
+		}
+	}
+
+	cout << min << "\n";
+}
+
+/*
+limitation : 5000개의 노드
+
+전략 : Bruteforce 근데 이제 pruning을 곁들인
+ - 음식을 요리할 때마다 가능 영역에 map을 둠
+ - 충돌 시 cost가 가장 적은 방향으로
+ - 오름 차순으로 정렬
+
+- UtilMethod : min
+
+800 * 3 * 5,000 / 2 = 6,000,000?
+*/
