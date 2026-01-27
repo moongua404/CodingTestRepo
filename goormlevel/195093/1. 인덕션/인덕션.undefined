@@ -1,84 +1,69 @@
-#include <iostream>
-#include <map>
-#include <algorithm>
-using namespace std;
+	Entry board[10][10];
+	int before;
+	int currentLevel;
 
-int minCost(int a, int b) {
-	int c1 = a-b;
-	int c2 = b-a;
-	if (c1 < 0) c1 = 10 + c1;
-	if (c2 < 0) c2 = 10 + c2;
-	return (c1 < c2) ? c1 : c2;
-}
-
-struct InductionSet {
-public:
-	int slot[3];
-	InductionSet(int a, int b, int c) {
-		slot[0] = a;
-		slot[1] = b;
-		slot[2] = c;
-		sort(slot, slot+3);
+	int getClickCost(int bef, int aft) {
+		int v1 = bef - aft, v2 = aft - bef;
+		v1 = (v1 < 0) ? 10 + v1 : v1;
+		v2 = (v2 < 0) ? 10 + v2 : v2;
+		return (v1 < v2) ? v1 : v2;
 	}
-	bool operator<(const InductionSet& other) const {
-		if (slot[0] == other.slot[0] && slot[1] == other.slot[1]) return slot[2] < other.slot[2];
-		if (slot[0] == other.slot[0]) return slot[1] < other.slot[1];
-		return slot[0] < other.slot[0];
+	
+public:
+	Board(int a, int b, int c) {
+		board[b][c].cost = 0;
+		board[b][c].level = 0;
+		before = a;
+		currentLevel = 0;
+	}
+	void cook(int v) {
+		currentLevel++;
+		int changes[10][10];
+		travelsal([&](int i, int j){ changes[i][j] = MAX_INT; }, 10);
+		travelsal([&](int i, int j) {
+			if (board[i][j].level == currentLevel-1) {
+				int arr[3] = {i, j, before};
+				for (int _ = 0; _ < 3; _++) {
+					int clickCost = getClickCost(arr[2], v);
+					if (changes[arr[0]][arr[1]] > board[i][j].cost + clickCost) {
+						changes[arr[0]][arr[1]] = board[i][j].cost + clickCost;
+					}
+					swap(arr[0], arr[1]);
+					swap(arr[1], arr[2]);
+				}
+			}
+		}, 10);
+		travelsal([&](int i, int j) {
+			if (changes[i][j] != MAX_INT) {
+				board[i][j].level = currentLevel;
+				board[i][j].cost = changes[i][j];
+			}
+		}, 10);
+		
+		before = v;
+	}
+	int getBest() {
+		int min = MAX_INT;
+		travelsal([&](int i, int j) {
+			if (board[i][j].level == currentLevel && board[i][j].cost < min) {
+				min = board[i][j].cost;
+			}
+		}, 10);
+		return min;
 	}
 };
 
 int main() {
+	Board board(0, 0, 0);
+	
 	int N;
 	cin >> N;
 
-	map<int, int*> others;
-	others.insert({0, new int[2]{1, 2}});
-	others.insert({1, new int[2]{0, 2}});
-	others.insert({2, new int[2]{0, 1}});
-
-	map<InductionSet, int> sets;
-	sets.insert({InductionSet(0, 0, 0), 0});
-	
-	for (int i = 0; i < N; i++) {
-		int degree;
-		cin >> degree;
-		map<InductionSet, int> newSets;
-
-		for (pair<InductionSet, int> set : sets) {
-			for (int index : {0, 1, 2}) {
-				int addCost = minCost(set.first.slot[index], degree);
-				InductionSet newSet(InductionSet(set.first.slot[others[index][0]], set.first.slot[others[index][1]], degree));
-				if (newSets.find(newSet) == newSets.end()) {
-					newSets.insert({newSet, set.second + addCost});
-					continue;
-				}
-				if (newSets[newSet] > set.second + addCost) {
-					newSets[newSet] = set.second + addCost;
-				}
-			}
-		}
-		sets = newSets;
+	for (int i = 1; i <= N; i++) {
+		int v;
+		cin >> v;
+		board.cook(v);
 	}
 
-	int min = 5000 * 9 + 1;
-	for (pair<InductionSet, int> set : sets) {
-		if (min > set.second) {
-			min = set.second;
-		}
-	}
-
-	cout << min << "\n";
+	cout << board.getBest();
 }
-
-/*
-limitation : 5000개의 노드
-
-전략 : Bruteforce 근데 이제 pruning을 곁들인
- - 음식을 요리할 때마다 가능 영역에 map을 둠
- - 충돌 시 cost가 가장 적은 방향으로
- - 오름 차순으로 정렬
-
-- UtilMethod : min
-
-800 * 3 * 5,000 / 2 = 6,000,000?
-*/
