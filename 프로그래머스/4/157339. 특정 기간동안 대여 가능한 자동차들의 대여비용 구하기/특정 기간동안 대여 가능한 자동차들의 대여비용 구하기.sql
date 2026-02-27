@@ -1,0 +1,32 @@
+-- 코드를 입력하세요
+SELECT a.CAR_ID, a.CAR_TYPE, CEIL(a.SALED_PRICE * 30) AS FEE
+FROM (
+    SELECT a.CAR_ID, a.CAR_TYPE, a.DAILY_FEE * (
+        SELECT MIN (100 - DISCOUNT_RATE) / 100
+        FROM CAR_RENTAL_COMPANY_DISCOUNT_PLAN b
+        WHERE a.CAR_TYPE = b.CAR_TYPE
+        AND b.DURATION_TYPE != '90일 이상'
+        GROUP BY b.CAR_TYPE
+    ) SALED_PRICE
+    FROM CAR_RENTAL_COMPANY_CAR a
+    WHERE a.CAR_TYPE IN ('SUV', '세단')
+    AND a.CAR_ID NOT IN (
+        SELECT h.CAR_ID
+        FROM CAR_RENTAL_COMPANY_RENTAL_HISTORY h
+        WHERE h.START_DATE <= DATE('2022-11-30') AND END_DATE >= DATE('2022-11-01')
+    )
+) a
+WHERE a.SALED_PRICE >= (500000 / 30)
+    AND a.SALED_PRICE <= (2000000 / 30)
+ORDER BY a.SALED_PRICE DESC, a.CAR_TYPE, a.CAR_ID DESC
+;
+
+/*
+자동차 종류가 '세단' 또는 'SUV'인 자동차 중
+2022년 11월 1일부터 2022년 11월 30일까지 대여 가능하고
+30일간의 대여 금액이 50만원 이상 200만원 미만인 자동차에 대해
+자동차 ID, 자동차 종류, 대여 금액 ('FEE')
+ORDER BY 대여 금액 DESC, 자동차 종류, ID DESC
+
+HISTORY
+*/
