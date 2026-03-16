@@ -11,11 +11,11 @@ void solution() {
 			idx++;
 
 			ch = cin.get();
-			if (ch == '\n' || ch == '#') break;
+			if (ch == '#') return;
+			if (ch == '\n') break;
 			if (ch == ' ') continue;
 			checksum += (int(ch) - 64) * idx;
 		}
-		if (ch == '#') break;
 		cout << checksum << '\n';
 	}
 }
