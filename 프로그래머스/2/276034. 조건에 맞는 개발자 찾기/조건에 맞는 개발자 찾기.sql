@@ -1,0 +1,10 @@
+-- 코드를 작성해주세요
+SELECT
+    DISTINCT(d.ID) AS "ID",
+    d.EMAIL AS "EMAIL",
+    d.FIRST_NAME AS "FIRST_NAME",
+    d.LAST_NAME AS "LAST_NAME"
+FROM DEVELOPERS d, SKILLCODES s
+WHERE (s.NAME = "C#" AND d.SKILL_CODE % (s.CODE * 2) >= s.CODE)
+    OR (s.NAME = "Python" AND d.SKILL_CODE % (s.CODE * 2) >= s.CODE)
+ORDER BY ID;
