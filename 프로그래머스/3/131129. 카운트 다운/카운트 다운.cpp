@@ -61,11 +61,6 @@ vector<int> solution(int target) {
         
         if (node.left >= 50) { // 불
             q.push_back(node.add(-50, {1, 1}));
-            continue; // 충분히 크다면 이왕이면 불
-        }
-        
-        if (node.left >= 50) {
-            continue; 
         }
         
         if (node.left >= 2) { // 더블
