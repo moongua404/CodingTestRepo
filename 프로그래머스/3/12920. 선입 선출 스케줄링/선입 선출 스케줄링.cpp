@@ -27,6 +27,7 @@ int solution(int n, vector<int> cores) {
     }
     
     n -= runnableJobs(cores, maxV-1);
+    if (n == 0) return cores.size();
     for (int i = 0; i < cores.size(); i++) {
         if (maxV % cores[i] == 0) n--;
         if (n <= 0) return i+1;
